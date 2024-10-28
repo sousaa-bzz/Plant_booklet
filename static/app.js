@@ -2,6 +2,31 @@ document.addEventListener("DOMContentLoaded", function() {
     fetchPlants(); // Fetch all plants on page load
 });
 
+// Function to fetch and display only plants with even IDs
+function showEvenIdPlants() {
+    fetch("/plants/even")  // Use the new endpoint
+        .then(response => response.json())
+        .then(data => {
+            const plantList = document.getElementById("plant-list");
+            plantList.innerHTML = "";  // Clear existing entries
+
+            data.forEach(plant => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${plant.id}</td>
+                    <td>${plant.name}</td>
+                    <td>${plant.planted_date}</td>
+                    <td>
+                        <button class="action-btn" onclick="editPlant(${plant.id})">Edit</button>
+                        <button class="action-btn delete-btn" onclick="deletePlant(${plant.id})">Delete</button>
+                    </td>
+                `;
+                plantList.appendChild(row);
+            });
+        });
+}
+
+
 // Fetch all plants from the server
 function fetchPlants() {
     fetch("/plants")

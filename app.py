@@ -8,12 +8,10 @@ app = Flask(__name__, static_folder='static', template_folder='templates')
 # Initialize DAO
 dao = PlantDao("garden.db")
 
-
 # Serve the index.html (Web UI)
 @app.route("/")
 def index():
     return render_template("index.html")
-
 
 # POST /plants - Add a new plant
 @app.route("/plants", methods=["POST"])
@@ -27,7 +25,6 @@ def add_plant():
     dao.add_plant(new_plant)
     return jsonify({"id": new_plant.plant_id, "message": "Plant added successfully"}), 201
 
-
 # GET /plants - List all plants
 @app.route("/plants", methods=["GET"])
 def get_all_plants():
@@ -35,6 +32,13 @@ def get_all_plants():
     return jsonify(
         [{"id": plant.plant_id, "name": plant.name, "planted_date": plant.planted_date} for plant in plants]), 200
 
+# New Endpoint - GET /plants/even - List plants with even IDs only
+@app.route("/plants/even", methods=["GET"])
+def get_even_id_plants():
+    plants = dao.get_all_plants()
+    even_plants = [plant for plant in plants if plant.plant_id % 2 == 0]
+    return jsonify(
+        [{"id": plant.plant_id, "name": plant.name, "planted_date": plant.planted_date} for plant in even_plants]), 200
 
 # PUT /plants/<int:plant_id> - Update an existing plant
 @app.route("/plants/<int:plant_id>", methods=["PUT"])
@@ -54,7 +58,6 @@ def update_plant(plant_id):
     else:
         abort(400, description="Failed to update plant")
 
-
 # DELETE /plants/<int:plant_id> - Delete a plant
 @app.route("/plants/<int:plant_id>", methods=["DELETE"])
 def delete_plant(plant_id):
@@ -62,7 +65,6 @@ def delete_plant(plant_id):
         return jsonify({"message": "Plant deleted successfully"}), 200
     else:
         abort(400, description="Failed to delete plant")
-
 
 # Start the app
 if __name__ == "__main__":
