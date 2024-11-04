@@ -1,5 +1,5 @@
 """
-Plant Manager REST API using Flask
+Plant Manager REST API using Flask and SQLite
 """
 
 from flask import Flask, jsonify, request, abort, render_template
