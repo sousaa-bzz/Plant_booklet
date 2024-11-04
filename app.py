@@ -1,3 +1,7 @@
+"""
+Plant Manager REST API
+"""
+
 from flask import Flask, jsonify, request, abort, render_template
 from plant import Plant
 from plant_dao import PlantDao

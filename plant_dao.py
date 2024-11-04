@@ -1,3 +1,6 @@
+"""
+Plant Data Access Object
+"""
 import sqlite3
 from plant import Plant
 
