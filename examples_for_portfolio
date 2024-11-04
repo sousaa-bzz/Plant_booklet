@@ -1,0 +1,79 @@
+# coment this
+
+"""
+@app.route("/plants/uppercase", methods=["GET"])
+def get_plants_uppercase():
+    plants = dao.get_all_plants()
+    plant_names_uppercase = list(map(lambda plant: plant.name.upper(), plants))
+    return jsonify(plant_names_uppercase), 200
+
+@app.route("/plants/before_date", methods=["GET"])
+def get_plants_before_date():
+    date_str = request.args.get("date")
+    if not date_str:
+        abort(400, description="Date parameter is required.")
+    try:
+        filter_date = datetime.strptime(date_str, "%Y-%m-%d")
+    except ValueError:
+        abort(400, description="Invalid date format. Use YYYY-MM-DD.")
+
+    plants = dao.get_all_plants()
+    plants_before_date = list(filter(lambda plant: datetime.strptime(plant.planted_date, "%Y-%m-%d") < filter_date, plants))
+    return jsonify(
+        [{"id": plant.plant_id, "name": plant.name, "planted_date": plant.planted_date} for plant in plants_before_date]
+    ), 200
+
+@app.route("/plants/count", methods=["GET"])
+def get_plant_count():
+    plants = dao.get_all_plants()
+    plant_count = reduce(lambda count, _: count + 1, plants, 0)
+    return jsonify({"total_plants": plant_count}), 200
+
+
+from functools import reduce
+
+# Combined example: Filter plants by date, convert names to uppercase, and count them
+@app.route("/plants/before_date_count_uppercase", methods=["GET"])
+def get_filtered_count_uppercase():
+    date_str = request.args.get("date")
+    if not date_str:
+        abort(400, description="Date parameter is required.")
+    try:
+        filter_date = datetime.strptime(date_str, "%Y-%m-%d")
+    except ValueError:
+        abort(400, description="Invalid date format. Use YYYY-MM-DD.")
+
+    plants = dao.get_all_plants()
+
+    # Apply filter, map, and reduce in sequence
+    filtered_plants = filter(lambda plant: datetime.strptime(plant.planted_date, "%Y-%m-%d") < filter_date, plants)
+    uppercase_names = map(lambda plant: plant.name.upper(), filtered_plants)
+    plant_count = reduce(lambda count, _: count + 1, uppercase_names, 0)
+
+    return jsonify({"filtered_plant_count": plant_count}), 200
+
+
+    # Complex data processing example: Filter plants by date, format data structure, and aggregate count
+@app.route("/plants/aggregate", methods=["GET"])
+def aggregate_plants_before_date():
+    date_str = request.args.get("date")
+    if not date_str:
+        abort(400, description="Date parameter is required.")
+    try:
+        filter_date = datetime.strptime(date_str, "%Y-%m-%d")
+    except ValueError:
+        abort(400, description="Invalid date format. Use YYYY-MM-DD.")
+
+    plants = dao.get_all_plants()
+
+    # Step 1: Filter plants based on planting date
+    filtered_plants = filter(lambda plant: datetime.strptime(plant.planted_date, "%Y-%m-%d") < filter_date, plants)
+
+    # Step 2: Map plants to a simplified structure with ID and uppercase name
+    simplified_structure = map(lambda plant: {"id": plant.plant_id, "name": plant.name.upper()}, filtered_plants)
+
+    # Step 3: Reduce to count the total number of filtered plants
+    plant_count = reduce(lambda count, _: count + 1, simplified_structure, 0)
+
+    return jsonify({"filtered_plant_count": plant_count}), 200
+"""

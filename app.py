@@ -1,5 +1,7 @@
 """
 Plant Manager REST API using Flask and SQLite
+to run code enter "flask run --host=0.0.0.0 --port=8000" in to terminal
+to stop code enter "ctrl + c" in terminal
 """
 
 from flask import Flask, jsonify, request, abort, render_template
@@ -44,6 +46,76 @@ def get_even_id_plants():
     return jsonify(
         [{"id": plant.plant_id, "name": plant.name, "planted_date": plant.planted_date} for plant in even_plants]), 200
 
+# Closure-based Filter Maker
+def make_filter(condition):
+    """Creates a filter function based on the provided condition."""
+    def filter_func(plant):
+        return condition(plant)
+    return filter_func
+
+# General Filter Function for Plants
+def get_filtered_plants(filter_func):
+    plants = dao.get_all_plants()
+    return [plant for plant in plants if filter_func(plant)]
+
+# Endpoint to get plants with a custom filter using make_filter
+@app.route("/plants/filter", methods=["GET"])
+def filter_plants():
+    filter_type = request.args.get("filter_type", "even")
+
+    # Define filters using closures
+    if filter_type == "even":
+        even_id_filter = make_filter(lambda plant: plant.plant_id % 2 == 0)
+        filtered_plants = get_filtered_plants(even_id_filter)
+    elif filter_type == "odd":
+        odd_id_filter = make_filter(lambda plant: plant.plant_id % 2 != 0)
+        filtered_plants = get_filtered_plants(odd_id_filter)
+    else:
+        abort(400, description="Unknown filter type provided.")
+
+    return jsonify(
+        [{"id": plant.plant_id, "name": plant.name, "planted_date": plant.planted_date} for plant in filtered_plants]
+    ), 200
+
+# Additional filter with multiple arguments
+@app.route("/plants/specific", methods=["GET"])
+def get_specific_plant():
+    plant_id = request.args.get("id", type=int)
+    plant_name = request.args.get("name", type=str)
+
+    if plant_id is None or plant_name is None:
+        abort(400, description="Both 'id' and 'name' are required parameters.")
+
+    # Lambda function that checks for both plant_id and plant_name
+    specific_filter = lambda plant, id, name: plant.plant_id == id and plant.name == name
+
+    # Use the lambda with the specific values for id and name
+    plants = dao.get_all_plants()
+    filtered_plants = [plant for plant in plants if specific_filter(plant, plant_id, plant_name)]
+
+    return jsonify(
+        [{"id": plant.plant_id, "name": plant.name, "planted_date": plant.planted_date} for plant in filtered_plants]
+    ), 200
+
+# Endpoint to sort plants based on user-defined criteria using lambdas
+@app.route("/plants/sorted", methods=["GET"])
+def get_sorted_plants():
+    sort_by = request.args.get("sort_by", "name")  # Default sorting is by name
+
+    plants = dao.get_all_plants()
+
+    # Lambda for sorting by different criteria
+    if sort_by == "name":
+        sorted_plants = sorted(plants, key=lambda plant: plant.name.lower())
+    elif sort_by == "planted_date":
+        sorted_plants = sorted(plants, key=lambda plant: plant.planted_date)
+    else:
+        abort(400, description="Invalid sort criteria provided.")
+
+    return jsonify(
+        [{"id": plant.plant_id, "name": plant.name, "planted_date": plant.planted_date} for plant in sorted_plants]
+    ), 200
+
 # PUT /plants/<int:plant_id> - Update an existing plant
 @app.route("/plants/<int:plant_id>", methods=["PUT"])
 def update_plant(plant_id):
@@ -69,6 +141,7 @@ def delete_plant(plant_id):
         return jsonify({"message": "Plant deleted successfully"}), 200
     else:
         abort(400, description="Failed to delete plant")
+
 
 # Start the app
 if __name__ == "__main__":
