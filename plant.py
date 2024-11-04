@@ -1,3 +1,7 @@
+"""
+Plant class
+"""
+
 class Plant:
     def __init__(self, plant_id, name, planted_date):
         self.plant_id = plant_id
